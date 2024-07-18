@@ -7,7 +7,7 @@
     'description': """A real-estate module to help sellers sell their property.""",
     'application': True,
     'installable': True,
-    'licence': 'LGPL-3',
+    'license': 'LGPL-3',
     'data': [
         'security/ir.model.access.csv',
         'views/estate_property_views.xml',
