@@ -45,3 +45,13 @@ class Property(models.Model):
         """Find the area of the whole property"""
         for record in self:
             record.total_area = record.living_area + record.garden_area
+
+    best_price = fields.Float(compute="_compute_best_price")
+
+    @api.depends('offer_ids.price')
+    def _compute_best_price(self):
+        """Find the highest price offer"""
+        for record in self:
+            record.best_price = max(record.offer_ids.mapped('price'))
+
+    
