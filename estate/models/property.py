@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, exceptions
 from datetime import timedelta
 class Property(models.Model):
     """Model for properties"""
@@ -52,6 +52,33 @@ class Property(models.Model):
     def _compute_best_price(self):
         """Find the highest price offer"""
         for record in self:
-            record.best_price = max(record.offer_ids.mapped('price'))
+            if len(record.offer_ids) > 0:
+                record.best_price = max(record.offer_ids.mapped('price'))
+            else:
+                record.best_price = 0
 
-    
+    #onchange for garden
+    @api.onchange('garden')
+    def _onchange_garden(self):
+        if self.garden:
+            self.garden_area = 10
+            self.garden_orientation = 'north'
+        else:
+            self.garden_area = 0
+            self.garden_orientation = False
+
+    def action_sell_property(self):
+        """Change state to sold and set selling price"""
+        for record in self:
+            if record.state == 'canceled':
+                raise exceptions.UserError("You cannot sell a canceled property")
+            record.state = 'sold'
+        return True
+
+    def action_cancel_property(self):
+        """Change state to canceled"""
+        for record in self:
+            if record.state == 'sold':
+                raise exceptions.UserError("You cannot cancel a sold property")
+            record.state = 'canceled'
+        return True
