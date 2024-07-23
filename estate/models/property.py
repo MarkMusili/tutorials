@@ -6,6 +6,7 @@ class Property(models.Model):
     """Model for properties"""
     _name = 'estate.property'
     _description = 'Real Estate Properties'
+    _id = "id desc"
 
     name = fields.Char(required=True)
     description = fields.Text()
@@ -39,6 +40,7 @@ class Property(models.Model):
     buyer_id = fields.Many2one('res.partner', string='Buyer', copy=False)
     tag_ids = fields.Many2many('estate.property.tag', string='Tags')
     offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Offers')
+    property_type_id = fields.Many2one('estate.property.type', string='Property Type')
 
     total_area = fields.Float(compute='_compute_total_area')
 
@@ -69,6 +71,7 @@ class Property(models.Model):
             self.garden_area = 0
             self.garden_orientation = False
 
+
     def action_sell_property(self):
         """Change state to sold and set selling price"""
         for record in self:
@@ -94,7 +97,7 @@ class Property(models.Model):
     def _check_selling_price(self):
         """Ensure the offer price is not less than 90% of selling price"""
         for record in self:
-            if not float_is_zero(record.selling_price, precision_digits=2) and not float_is_zero(record.offer_ids.price, precision_digits=2):
+            if not float_is_zero(record.selling_price, precision_digits=2):
                 expected_90_percent = record.expected_price * 0.9
                 if float_compare(record.selling_price, expected_90_percent, precision_digits=2) < 0:
                     raise ValidationError("The selling price cannot be lower than 90% of the expected price. You must lower the expected price if you want to accept this offer.")
