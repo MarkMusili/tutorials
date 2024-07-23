@@ -10,6 +10,7 @@ class PropertyOffer(models.Model):
     _description = "Real Estate Property Offer"
 
     price = fields.Float()
+    _order = 'price desc'
     status = fields.Selection([
         ('accepted', 'Accepted'),
         ('refused', 'Refused'),
@@ -31,9 +32,11 @@ class PropertyOffer(models.Model):
     #Not sure if its working
     def _refuse_other_offers(self, property_id):
         """Refuse all other offers for the property."""
-        for record in property_id.offer_ids:
-            if record.status == 'accepted' and record.property_id != property_id:
-                record.status = 'refused'
+        other_offers = self.env['estate.property.offer'].search([
+            ('property_id', '=', property_id.id),
+            ('status', '=', False)
+        ])
+        other_offers.write({'status': 'refused'})
 
     def action_accept_offer(self):
         """Change state to Accepted"""
@@ -43,6 +46,7 @@ class PropertyOffer(models.Model):
                 self._refuse_other_offers(record.property_id)
                 record.property_id.selling_price = record.price
                 record.property_id.buyer_id = record.partner_id
+                record.property_id.state = 'offer_accepted'
         return True
 
     def action_refuse_offer(self):

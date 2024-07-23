@@ -35,6 +35,7 @@
                         <header>
                             <button name="action_sell_property" type="object" string="SOLD"/>
                             <button name="action_cancel_property" type="object" string="CANCEL"/>
+                            <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold"/>
                         </header>
                         <div class="oe_title">
                             <h1>
@@ -43,9 +44,6 @@
                         </div>
                         <field name="tag_ids" widget="many2many_tags"/>
                         <group>
-                            <group>
-                                <field name="state" string="Status"/>
-                            </group>
                             <group>
                                 <field name="property_type_id" string="Property Type"/>
                             </group>
