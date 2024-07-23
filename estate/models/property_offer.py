@@ -1,6 +1,7 @@
 from odoo import models, fields, api
 from datetime import timedelta, date
 
+
 class PropertyOffer(models.Model):
     """
     Property Offer Model
@@ -49,3 +50,7 @@ class PropertyOffer(models.Model):
         for record in self:
             record.status = 'refused'
         return True
+
+    _sql_constraints = [
+        ('check_price_positive', 'CHECK(price >= 0)', 'Offer Price must be strictly positive')
+    ]
