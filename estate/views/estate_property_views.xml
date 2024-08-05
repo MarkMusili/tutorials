@@ -33,8 +33,8 @@
                 <form string="Estate Property">
                     <sheet>
                         <header>
-                            <button name="action_sell_property" type="object" string="SOLD"/>
-                            <button name="action_cancel_property" type="object" string="CANCEL"/>
+                            <button name="action_sell_property" invisible="state == 'sold'"  type="object" string="SOLD"/>
+                            <button name="action_cancel_property" invisible="state in ['canceled', 'sold']" type="object" string="CANCEL"/>
                             <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold"/>
                         </header>
                         <div class="oe_title">
@@ -42,10 +42,10 @@
                                 <field name="name" nolabel="1"/>
                             </h1>
                         </div>
-                        <field name="tag_ids" widget="many2many_tags"/>
+                        <field name="tag_ids"  editable="bottom" options="{'color_field': 'color'}" widget="many2many_tags"/>
                         <group>
                             <group>
-                                <field name="property_type_id" string="Property Type"/>
+                                <field name="property_type_id" options="{'no_create': 'true'}" string="Property Type"/>
                             </group>
                             <group>
                                 <field name="postcode" string="Postcode"/>
@@ -71,20 +71,21 @@
                                     <field name="living_area" string="Living Area (sqm)"/>
                                     <field name="facades" string="Facade"/>
                                     <field name="garden" string="Garden"/>
-                                    <field name="garden_area" string="Garden Area (sqm)"/>
-                                    <field name="garden_orientation" string="Garden Orientation"/>
+                                    <field name="garden_area" invisible="not garden" string="Garden Area (sqm)"/>
+                                    <field name="garden_orientation" invisible="not garden" string="Garden Orientation"/>
                                     <field name="total_area" string="Total Area (sqm)"/>
                                 </group>
                             </page>
                             <page string="Offers">
-                                <field name="offer_ids">
+                                <field name="state" invisible="1"/>
+                                <field name="offer_ids" readonly="state in ['sold', 'canceled', 'offer_accepted']">
                                     <tree>
                                         <field name="price" string="Price"/>
                                         <field name="partner_id" string="Partner"/>
                                         <field name="validity" string="Validity "/>
                                         <field name="date_deadline" string="Deadline"/>
-                                        <button type="object" name="action_accept_offer" icon="fa-check" title="Accept"/>
-                                        <button type="object" name="action_refuse_offer" icon="fa-times" title="Refuse"/>
+                                        <button type="object" invisible="status == 'accepted' or status == 'refused'"  name="action_accept_offer" icon="fa-check" title="Accept"/>
+                                        <button type="object" invisible="status == 'accepted' or status == 'refused'"  name="action_refuse_offer" icon="fa-times" title="Refuse"/>
                                         <field name="status" string="Status"/>
                                     </tree>
                                     <form>
