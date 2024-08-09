@@ -5,6 +5,7 @@
             <field name="name">Properies</field>
             <field name="res_model">estate.property</field>
             <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_available_filter': 1}</field>
         </record>
 
 
@@ -12,16 +13,17 @@
             <field name="name">estate.property.tree</field>
             <field name="model">estate.property</field>
             <field name="arch" type="xml">
-                <tree string="Estate Properties">
+                <tree string="Estate Properties" decoration-success="state in ['offer_accepted', 'offer_received']" decoration-bf="state == 'offer_accepted'" decoration-muted="state == 'sold'">
                     <field name="name" string="Title"/>
                     <field name="postcode" string="Postcode"/>
                     <field name="bedrooms" string="Bedrooms"/>
                     <field name="living_area" string="Living Area (sqm)"/>
                     <field name="expected_price" string="Expected Price"/>
                     <field name="selling_price" string="Selling Price"/>
-                    <field name="date_availability" string="Available From"/>
+                    <field name="date_availability" string="Available From" optional="true"/>
                     <field name="property_type_id" string="Property Type"/>
                     <field name="tag_ids" widget="many2many_tags"/>
+                    <field name="state" invisible="true"/>
                 </tree>
             </field>
         </record>
@@ -79,7 +81,7 @@
                             <page string="Offers">
                                 <field name="state" invisible="1"/>
                                 <field name="offer_ids" readonly="state in ['sold', 'canceled', 'offer_accepted']">
-                                    <tree>
+                                    <tree editable="bottom" edit="true" decoration-danger="status == 'refused'" decoration-success="status == 'accepted'">
                                         <field name="price" string="Price"/>
                                         <field name="partner_id" string="Partner"/>
                                         <field name="validity" string="Validity "/>
@@ -87,6 +89,7 @@
                                         <button type="object" invisible="status == 'accepted' or status == 'refused'"  name="action_accept_offer" icon="fa-check" title="Accept"/>
                                         <button type="object" invisible="status == 'accepted' or status == 'refused'"  name="action_refuse_offer" icon="fa-times" title="Refuse"/>
                                         <field name="status" string="Status"/>
+                                        <!-- <field name="property_type_id" string="Property Type"/> -->
                                     </tree>
                                     <form>
                                         <sheet>
@@ -122,7 +125,8 @@
                     <field name="postcode" string="Postcode"/>
                     <field name="expected_price" string="Expected Price"/>
                     <field name="bedrooms" string="Bedrooms"/>
-                    <field name="living_area" string="Living Area (sqm)"/>
+                    <field name="living_area" string="Living Area (sqm)"
+                        filter_domain ="[('living_area' '>=' self)]"/>
                     <field name="facades" string="Facade"/>
                     <field name="property_type_id" string="Property Type"/>
                     <filter string="Available" name="available_filter" domain="[('state', 'in', ['New', 'Offer Recieved'])]"/>

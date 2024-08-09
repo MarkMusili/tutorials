@@ -36,11 +36,18 @@ class Property(models.Model):
     ], default='new', copy=False)
 
     property_type_id = fields.Many2one('estate.property.type', string='Property Type')
+    offer_count = fields.Integer(compute='_compute_offer_count', string='Number of Offers')
+
+    @api.depends('offer_ids')
+    def _compute_offer_count(self):
+        """Compute the number of offers for each property"""
+        for record in self:
+            record.offer_count = len(record.offer_ids)
     salesperson_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     buyer_id = fields.Many2one('res.partner', string='Buyer', copy=False)
     tag_ids = fields.Many2many('estate.property.tag', string='Tags')
     offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Offers')
-    property_type_id = fields.Many2one('estate.property.type', string='Property Type')
+    # property_type_id = fields.Many2one('estate.property.type', string='Property Type')
 
     total_area = fields.Float(compute='_compute_total_area')
 
@@ -101,3 +108,18 @@ class Property(models.Model):
                 expected_90_percent = record.expected_price * 0.9
                 if float_compare(record.selling_price, expected_90_percent, precision_digits=2) < 0:
                     raise ValidationError("The selling price cannot be lower than 90% of the expected price. You must lower the expected price if you want to accept this offer.")
+
+    @api.ondelete(at_uninstall=False)
+    def _ondelete(self):
+        """Delete all offers when deleting a property"""
+        for record in self:
+            if record.state not in ['new', 'canceled']:
+                raise exceptions.UserError("You cannot delete a property that is not new or canceled")
+
+    # @api.model
+    # def create(self, vals):
+    #     """Ensure the expected price is set as the selling price"""
+    #     property_id = self.env['estate.property'].browse(vals.get('property_id'))
+
+    #     if property_id.offer_ids:
+    #         vals['selling_price'] = property_id.offer_ids[0].price
