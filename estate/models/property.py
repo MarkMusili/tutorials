@@ -80,7 +80,7 @@ class Property(models.Model):
             self.garden_orientation = False
 
 
-    def action_sell_property(self):
+    def action_sold(self):
         """Change state to sold and set selling price"""
         for record in self:
             if record.state == 'canceled':

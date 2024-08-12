@@ -35,7 +35,7 @@
                 <form string="Estate Property">
                     <sheet>
                         <header>
-                            <button name="action_sell_property" invisible="state == 'sold'"  type="object" string="SOLD"/>
+                            <button name="action_sold" invisible="state == 'sold'"  type="object" string="SOLD"/>
                             <button name="action_cancel_property" invisible="state in ['canceled', 'sold']" type="object" string="CANCEL"/>
                             <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold"/>
                         </header>
