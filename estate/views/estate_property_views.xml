@@ -4,7 +4,7 @@
         <record id="action_estate_property" model="ir.actions.act_window">
             <field name="name">Properies</field>
             <field name="res_model">estate.property</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,kanban</field>
             <field name="context">{'search_default_available_filter': 1}</field>
         </record>
 
@@ -132,6 +132,34 @@
                     <filter string="Available" name="available_filter" domain="[('state', 'in', ['New', 'Offer Recieved'])]"/>
                     <filter string="Postcode" name="group_by_postcode" context="{'group_by':'postcode'}"/>
                 </search>
+            </field>
+        </record>
+
+        <!-- Simple kanban view for the properties -->
+        <record id="estate_property_kanban_view" model="ir.ui.view">
+            <field name="name">estate.property.kanban</field>
+            <field name="model">estate.property</field>
+            <field name="arch" type="xml">
+                <kanban records_draggable="false" default_group_by="property_type_id">
+                    <field name="state"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <field name="name"/>
+                                <div>
+                                    <field name="expected_price"/>
+                                </div>
+                                <t t-if="record.state.raw_value == 'offer_received'">
+                                    <field name="best_price"/>
+                                </t>
+                                <t t-if="record.state.raw_value == 'offer_accepted'">
+                                    <field name="selling_price"/>
+                                </t>
+                                <field name="tag_ids"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
             </field>
         </record>
     </data>
