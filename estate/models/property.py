@@ -37,6 +37,7 @@ class Property(models.Model):
 
     property_type_id = fields.Many2one('estate.property.type', string='Property Type')
     offer_count = fields.Integer(compute='_compute_offer_count', string='Number of Offers')
+    salesperson_id = fields.Many2one('res.users', string='Salesperson' )
 
     @api.depends('offer_ids')
     def _compute_offer_count(self):
@@ -110,16 +111,15 @@ class Property(models.Model):
                     raise ValidationError("The selling price cannot be lower than 90% of the expected price. You must lower the expected price if you want to accept this offer.")
 
     @api.ondelete(at_uninstall=False)
-    def _ondelete(self):
+    def _unlink_if_state_not_new_canceled(self):
         """Delete all offers when deleting a property"""
         for record in self:
             if record.state not in ['new', 'canceled']:
                 raise exceptions.UserError("You cannot delete a property that is not new or canceled")
+            record.offer_ids.unlink()
 
-    # @api.model
-    # def create(self, vals):
-    #     """Ensure the expected price is set as the selling price"""
-    #     property_id = self.env['estate.property'].browse(vals.get('property_id'))
-
-    #     if property_id.offer_ids:
-    #         vals['selling_price'] = property_id.offer_ids[0].price
+    @api.model
+    def create(self, vals):
+        if vals.get['state'] == 'new':
+            vals['state'] == 'offer_received'
+        return super(Property, self).create(vals)

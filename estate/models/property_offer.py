@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, exceptions
 from datetime import timedelta, date
 
 
@@ -55,6 +55,14 @@ class PropertyOffer(models.Model):
         for record in self:
             record.status = 'refused'
         return True
+
+    @api.model
+    def create(self, vals):
+        property_id = self.env['estate.property'].browse(vals.get('property_id'))
+        if property_id.offer_ids and any(offer.price > vals['price'] for offer in property_id.offer_ids):
+            raise exceptions.UserError("You cannot create an offer with a lower amount than an existing offer.")
+        property_id.state = 'offer_received'
+        return super(PropertyOffer, self).create(vals)
 
     _sql_constraints = [
         ('check_price_positive', 'CHECK(price >= 0)', 'Offer Price must be strictly positive')
