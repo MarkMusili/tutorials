@@ -107,13 +107,12 @@
                         filter_domain ="[('living_area'>=' self)]"/>
                     <field name="facades" string="Facade"/>
                     <field name="property_type_id" string="Property Type"/>
-                    <filter string="Available" name="available_filter" domain="[('state', 'in', ['New', 'Offer Recieved'])]"/>
+                    <filter string="Available" name="available_filter" domain="[('state', 'in', ['new', 'offer_received'])]"/>
                     <filter string="Postcode" name="group_by_postcode" context="{'group_by':'postcode'}"/>
                 </search>
             </field>
         </record>
 
-        <!-- Simple kanban view for the properties -->
         <record id="estate_property_kanban_view" model="ir.ui.view">
             <field name="name">estate.property.kanban</field>
             <field name="model">estate.property</field>
@@ -121,11 +120,11 @@
                 <kanban records_draggable="false" default_group_by="property_type_id">
                     <field name="state"/>
                     <templates>
-                        <t t-name="kanban-box">
+                        <t t-name="card">
                             <div class="oe_kanban_global_click">
-                                <field name="name"/>
+                                <field class="fw-bold" name="name"/>
                                 <div>
-                                    <field name="expected_price"/>
+                                    <field string="Expected Price" name="expected_price"/>
                                 </div>
                                 <t t-if="record.state.raw_value == 'offer_received'">
                                     <field name="best_price"/>
@@ -133,7 +132,7 @@
                                 <t t-if="record.state.raw_value == 'offer_accepted'">
                                     <field name="selling_price"/>
                                 </t>
-                                <field name="tag_ids"/>
+                                <field name="tag_ids" widget='radio'/>
                             </div>
                         </t>
                     </templates>
