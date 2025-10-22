@@ -6,7 +6,7 @@ class Property(models.Model):
     """Model for properties"""
     _name = 'estate.property'
     _description = 'Real Estate Properties'
-    _id = "id desc"
+    _order = "id desc"
 
     name = fields.Char(required=True)
     description = fields.Text()
@@ -26,7 +26,7 @@ class Property(models.Model):
         ('east', 'East'),
         ('west', 'West')
     ])
-    active = fields.Boolean(default=True)
+    active =fields.Boolean(default=True)
     state = fields.Selection([
         ('new', 'New'),
         ('offer_received', 'Offer Received'),
@@ -37,13 +37,13 @@ class Property(models.Model):
 
     property_type_id = fields.Many2one('estate.property.type', string='Property Type')
     offer_count = fields.Integer(compute='_compute_offer_count', string='Number of Offers')
-    salesperson_id = fields.Many2one('res.users', string='Salesperson' )
 
     @api.depends('offer_ids')
     def _compute_offer_count(self):
         """Compute the number of offers for each property"""
         for record in self:
             record.offer_count = len(record.offer_ids)
+
     salesperson_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     buyer_id = fields.Many2one('res.partner', string='Buyer', copy=False)
     tag_ids = fields.Many2many('estate.property.tag', string='Tags')
@@ -96,10 +96,17 @@ class Property(models.Model):
             record.state = 'canceled'
         return True
 
-    _sql_constraints = [
-        ('check_expected_price', 'CHECK(expected_price >= 0)', 'The expected price must be strictly positive'),
-        ('check_selling_price', 'CHECK(selling_price >= 0)', 'The selling price must be positive')
-    ]
+    @api.constrains('expected_price')
+    def _check_expected_price(self):
+        for record in self:
+            if record.expected_price < 0:
+                raise ValidationError("The expected price must be strictly positive")
+
+    @api.constrains('selling_price')
+    def _check_selling_price_value(self):
+        for record in self:
+            if record.selling_price < 0:
+                raise ValidationError("The selling price must be strictly positive")
 
     @api.constrains('expected_price', 'selling_price')
     def _check_selling_price(self):
@@ -120,6 +127,7 @@ class Property(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get['state'] == 'new':
-            vals['state'] == 'offer_received'
+        for val in vals:
+            if val.get('state') == 'new':
+                val['state'] == 'offer_received'
         return super(Property, self).create(vals)

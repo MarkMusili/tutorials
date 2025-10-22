@@ -1,4 +1,6 @@
 from odoo import fields, models, api
+from odoo.exceptions import ValidationError
+
 
 class PropertyType(models.Model):
     """Model for Property types"""
@@ -18,6 +20,8 @@ class PropertyType(models.Model):
         for record in self:
             record.offer_count = len(record.offer_ids)
 
-    _sql_constraints = [
-        ('check_type_name_unique', 'UNIQUE(name)', 'Type name must be unique')
-    ]
+    @api.constrains('name')
+    def _check_type_name_unique(self):
+        for record in self:
+            if self.env['estate.property.type'].search([('name', '=', record.name), ('id', '!=', record.id)]):
+                raise ValidationError("Type name must be unique")

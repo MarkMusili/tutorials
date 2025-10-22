@@ -1,5 +1,7 @@
 from odoo import models, fields, api, exceptions
 from datetime import timedelta, date
+from odoo.exceptions import ValidationError
+
 
 
 class PropertyOffer(models.Model):
@@ -58,12 +60,15 @@ class PropertyOffer(models.Model):
 
     @api.model
     def create(self, vals):
-        property_id = self.env['estate.property'].browse(vals.get('property_id'))
-        if property_id.offer_ids and any(offer.price > vals['price'] for offer in property_id.offer_ids):
-            raise exceptions.UserError("You cannot create an offer with a lower amount than an existing offer.")
-        property_id.state = 'offer_received'
+        for val in vals:
+            property_id = self.env['estate.property'].browse(val.get('property_id'))
+            if property_id.offer_ids and any(offer.price > val['price'] for offer in property_id.offer_ids):
+                raise exceptions.UserError("You cannot create an offer with a lower amount than an existing offer.")
+            property_id.state = 'offer_received'
         return super(PropertyOffer, self).create(vals)
 
-    _sql_constraints = [
-        ('check_price_positive', 'CHECK(price >= 0)', 'Offer Price must be strictly positive')
-    ]
+    @api.constrains('price')
+    def _check_price_positive(self):
+        for record in self:
+            if record.price < 0:
+                raise ValidationError("Offer Price must be strictly positive")
