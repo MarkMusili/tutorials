@@ -20,7 +20,7 @@ class AwesomeDashboard(http.Controller):
             'nb_new_orders': the number of new orders, this month
             'total_amount': the total amount of orders, this month
         """
-
+        logger.info("the route has been called")
         return {
             'average_quantity': random.randint(4, 12),
             'average_time': random.randint(4, 123),
@@ -33,4 +33,3 @@ class AwesomeDashboard(http.Controller):
             },
             'total_amount': random.randint(100, 1000)
         }
-
